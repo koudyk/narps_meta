@@ -1,5 +1,5 @@
 # narps_meta
-Meta-analysis of the group-level statistical maps from the analysis teams involved in the NARPS project. This project is for a cours in Neuroimaging Data Science at McGill University (NEUR608, taught by Drs. Boris Bernhardt and Bratislav Misic)
+Meta-analysis of the group-level statistical maps from the analysis teams involved in the NARPS project. This project is for a graduate course in Neuroimaging Data Science at McGill University (NEUR608, taught by Drs. Boris Bernhardt and Bratislav Misic)
 
 To re-run these analyses, (*note that this won't work until the data is released publically.*)
 1. Get this repository: `$ git clone https://github.com/koudyk/narps_meta.git`
