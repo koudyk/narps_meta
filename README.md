@@ -1,11 +1,5 @@
 # narps_meta
-Meta-analysis of the NARPS dataset.
-
-Kendra Oudyk\
-NEUR608 Neuroimaging Data Science\
-McGill University\
-Drs. Boris Bernhardt and Bratislav Misic, instructors\
-2019-10-28\
+Meta-analysis of the group-level statistical maps from the analysis teams involved in the NARPS project. This project is for a cours in Neuroimaging Data Science at McGill University (NEUR608, taught by Drs. Boris Bernhardt and Bratislav Misic)
 
 To re-run these analyses, (*note that this won't work until the data is released publically.*)
 1. Download the dataset and move it to this directory: `./data_narps/`
@@ -15,3 +9,4 @@ To re-run these analyses, (*note that this won't work until the data is released
 5. In the Jupyter notebook environment (right word??), click on the 'analyses' folder.  
 6. Open a notebook (.ipynb file) and click "Cell >> Run Cells".
 
+Note that much of this code was borrowed/adapted from Alexandre Perez (https://github.com/alexprz/meta_analysis_notebook).
