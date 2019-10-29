@@ -1,14 +1,13 @@
 # narps_meta
-Meta-analysis of the NARPS dataset.
+Meta-analysis of the group-level statistical maps from the analysis teams involved in the NARPS project. This project is for a cours in Neuroimaging Data Science at McGill University (NEUR608, taught by Drs. Boris Bernhardt and Bratislav Misic)
 
-Kendra Oudyk\
-NEUR608 Neuroimaging Data Science\
-McGill University\
-Drs. Boris Bernhardt and Bratislav Misic, instructors\
-2019-10-28\
+To re-run these analyses, (*note that this won't work until the data is released publically.*)
+1. Download the dataset and move it to this directory: `./data_narps/`
+2. Get this repository: `$ git clone https://github.com/koudyk/narps_meta.git`
+3. Go to the repo: `$ cd narps_meta`
+4. Run the following file to generate the Dockerfile and build the docker image: `$ ./generate.sh`
+5. Start the docker container: `$ docker run -it --rm -p 8888:8888 -v /path/to/current/directory/:/home/neuro/test/ narps_meta_analysis`
+6. In the Jupyter notebook environment, click on the "analyses" folder.  
+7. Open a notebook (.ipynb file) and click "Cell >> Run Cells" from the menu at the top of the page.
 
-To re-run these analyses, 
-1. Get this repository: `$ git clone https://github.com/koudyk/narps_meta.git`
-2. Go to the repo: `$ cd narps_meta`
-3. Start the docker container: `$ docker run -it --rm -p 8888:8888 -v /path/to/current/directory/:/home/neuro/test/ narps_meta_analysis`
-4. 
+Note that much of this code was borrowed/adapted from Alexandre Perez (https://github.com/alexprz/meta_analysis_notebook).
