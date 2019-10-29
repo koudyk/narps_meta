@@ -154,11 +154,14 @@ def extract_from_paths(paths, sample_size, data=['coord', 'path'], level=.05,
         
         threshold = thresholding.map_threshold(path, level=level, \
                     height_control=height_control, cluster_threshold=cluster_threshold)[1]
-
+        #threshold=1.96
+        
         XYZ = None
         if 'coord' in data:
             XYZ = get_activations(path, threshold, space='pos')
             if XYZ is None:
+                return
+            if len(XYZ[0]) < 1:
                 return
 
         if 'path' in data:
@@ -209,13 +212,6 @@ def run_MFX_GLM(ds_dict):
 
     return res.get_map('t')
 
-def run_Fishers(ds_dict):
-    """Run Fishers on given data."""
-    ds = Dataset(ds_dict)
-    ma = nimare.meta.ibma.Fishers()
-    res = ma.fit(ds)
-
-    return res.get_map('z')
 
 def fdr_threshold(img_list, img_p, q=0.05):
     """Compute FDR and threshold same-sized images."""
