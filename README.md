@@ -5,8 +5,9 @@ To re-run these analyses, (*note that this won't work until the data is released
 1. Download the dataset and move it to this directory: `./data_narps/`
 2. Get this repository: `$ git clone https://github.com/koudyk/narps_meta.git`
 3. Go to the repo: `$ cd narps_meta`
-4. Start the docker container: `$ docker run -it --rm -p 8888:8888 -v /path/to/current/directory/:/home/neuro/test/ narps_meta_analysis`
-5. In the Jupyter notebook environment, click on the "analyses" folder.  
-6. Open a notebook (.ipynb file) and click "Cell >> Run Cells" from the menu at the top of the page.
+4. Run the following file to generate the Dockerfile and build the docker image: `$ ./generate.sh`
+5. Start the docker container: `$ docker run -it --rm -p 8888:8888 -v /path/to/current/directory/:/home/neuro/test/ narps_meta_analysis`
+6. In the Jupyter notebook environment, click on the "analyses" folder.  
+7. Open a notebook (.ipynb file) and click "Cell >> Run Cells" from the menu at the top of the page.
 
 Note that much of this code was borrowed/adapted from Alexandre Perez (https://github.com/alexprz/meta_analysis_notebook).
