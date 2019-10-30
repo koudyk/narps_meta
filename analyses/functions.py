@@ -1,3 +1,6 @@
+# Note that much of this code was borrowed/adapted from Alexandre Perez 
+# (https://github.com/alexprz/meta_analysis_notebook).
+
 import os
 import multiprocessing
 from joblib import Parallel, delayed
