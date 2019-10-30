@@ -22,7 +22,7 @@ generate() {
             duecredit
             sympy
             nipy
-            git+https://github.com/neurostuff/NiMARE.git#egg=nimare[peaks2maps-cpu]" \
+            git+https://github.com/alexprz/NiMARE.git@fdr-corrector" \
       create_env="neuro_py36" \
       activate=true \
     --run-bash "source activate neuro_py36 && git clone https://github.com/alexprz/nipy.git && cd nipy && python setup.py install" \
