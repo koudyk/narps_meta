@@ -155,7 +155,7 @@ def extract_from_paths(paths, sample_size, data=['coord', 'path'], level=.05,
         """Extract activation for multiprocessing."""
         #print(f'Extracting {path}...')
         
-        threshold = thresholding.map_threshold(path, level=level, \
+        threshold = thresholding.map_threshold(path, alpha=level, \
                     height_control=height_control, cluster_threshold=cluster_threshold)[1]
         #threshold=1.96
         
