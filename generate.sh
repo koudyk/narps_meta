@@ -15,14 +15,18 @@ generate() {
                       nilearn
                       numpy
                       scipy==1.2.0
-                      jupyter" \
-      pip_install="nilearn
+                      jupyter
+                      matplotlib
+                      seaborn" \
+      pip_install="git+git://github.com/nilearn/nilearn.git@2ead4d01df71d51c205a437a8fc5419ecb2a0beb
             nistats
             statsmodels==0.10.0rc2
             duecredit
             sympy
             nipy
-            git+https://github.com/alexprz/NiMARE.git@fdr-corrector" \
+            git+https://github.com/alexprz/NiMARE.git@fdr-corrector
+            git+https://github.com/netneurolab/netneurotools.git@0f0b03de92ccdd170c3648ee59292b8c9f25e8d7
+            git+https://github.com/MICA-MNI/BrainSpace.git" \
       create_env="neuro_py36" \
       activate=true \
     --run-bash "source activate neuro_py36 && git clone https://github.com/alexprz/nipy.git && cd nipy && python setup.py install" \
@@ -35,3 +39,7 @@ generate() {
 generate docker > Dockerfile
 
 docker build -t narps_meta_analysis .
+
+
+#--freesurfer version=6.0.0 mefthod=binaries \
+#--copy freesurfer_licence/license.txt /opt/freesurfer-#6.0.0/ \

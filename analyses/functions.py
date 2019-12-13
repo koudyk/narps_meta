@@ -6,7 +6,7 @@ import multiprocessing
 from joblib import Parallel, delayed
 import nilearn
 import numpy as np
-from nilearn import masking, plotting
+from nilearn import masking, plotting, image
 from nipy.labs.statistical_mapping import get_3d_peaks
 import nibabel as nib
 import scipy
@@ -16,11 +16,192 @@ from nimare.dataset import Dataset
 import nimare
 import copy
 from nistats import thresholding
+import glob
+import csv
+import IPython
+import pandas as pd
+from nilearn.input_data import NiftiMasker
 
 template = nilearn.datasets.load_mni152_template()
 Ni, Nj, Nk = template.shape
 affine = template.affine
 gray_mask = masking.compute_gray_matter_mask(template)
+
+def get_list_of_teams_we_have(teams_in_spreadsheet):
+    team_list_file = '../data-narps/orig/team_folder_list.csv'
+    with open(team_list_file) as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',')
+        for row in csvreader: 
+            team_list = row
+
+    for n_team in np.arange(len(team_list)):
+        team_list[n_team] = team_list[n_team][0:8]
+        
+    team_list = list(set(teams_in_spreadsheet).intersection(set(team_list)))
+    
+    team_list.sort()
+    
+    return team_list
+
+def img_paths_to_matrix_of_imgs(img_paths):
+    order = 'C'
+    for n, path in enumerate(img_paths):
+        img = nilearn.image.load_img(path)
+        img_resampled = image.resample_to_img(img, template)
+        array = img_resampled.get_fdata()
+        flat = array.ravel(order=order)
+        flat = np.array(flat)
+        flat = np.expand_dims(flat, axis=1)
+        if n == 0:
+            y = flat
+        else:
+            y = np.concatenate((y, flat), axis=1)
+    y=y.T
+    Y = np.matrix(y)
+    Y = np.nan_to_num(Y, copy=False, nan=0)
+    return Y
+
+def get_path_list_from_team_list(teams, all_paths):
+    team_paths = []
+    for path in all_paths:
+        for team in teams:
+            if team in path:
+                team_paths.append(path)
+    return team_paths
+
+def get_voxel_matrix(img_paths):
+    order = 'C'
+    for n, path in enumerate(img_paths):
+        img = nilearn.image.load_img(path)
+        img_resampled = image.resample_to_img(img, template)
+        array = img_resampled.get_fdata()
+        flat = array.ravel(order=order)
+        flat = np.array(flat)
+        flat = np.expand_dims(flat, axis=1)
+        if n == 0:
+            y = flat
+        else:
+            y = np.concatenate((y, flat), axis=1)
+    y=y.T
+    Y = np.matrix(y)
+    Y = np.nan_to_num(Y, copy=False, nan=0)
+    return Y
+
+def get_1s_ttest_design_matrix(Y):
+    x = np.ones_like(Y[:,0])
+    X = np.matrix(x).T
+    return X
+    
+def glm(Y, X):
+    beta = ((X.T * X)**-1) * X.T * Y
+    
+    n = Y.shape[0]
+    residual = np.array(Y - X*beta)
+    SSE = np.squeeze(np.sum(np.power(residual,2), axis=0))
+    SD = np.sqrt(SSE/(n-1))
+    SE = SD/np.sqrt(n)
+    
+    Z = np.arctanh(beta)
+    
+    T = beta/SE
+    
+    SE_map = fun.flat_mat_to_nii(flat_mat=SE, ref_niimg=template, order=order)
+    B_map = fun.flat_mat_to_nii(flat_mat=beta, ref_niimg=template, order=order)
+    Z_map = fun.flat_mat_to_nii(flat_mat=Z, ref_niimg=template, order=order)
+    T_map = fun.flat_mat_to_nii(flat_mat=T, ref_niimg=template, order=order)
+    
+    return T_map, SE_map, B_map, Z_map
+    
+    
+def mni_mask(img_nii):
+    mask = nilearn.datasets.load_mni152_brain_mask()
+    masker = NiftiMasker(mask_img=mask)
+    masker_fit = masker.fit_transform(img_nii)
+    img_nii_masked = masker.inverse_transform(masker_fit)
+    return img_nii_masked
+
+def flat_mat_to_nii(flat_mat, ref_niimg, order, dims=(91,109,91), copy_header=False):
+    arr = np.reshape(np.array(np.squeeze(flat_mat)), dims, order=order)
+    nii = nilearn.image.new_img_like(ref_niimg, arr, copy_header=copy_header)
+    nii_masked = mni_mask(nii)
+    return nii_masked
+
+
+def z_to_p(z_arr):
+    return 1-scipy.stats.norm.cdf(z_arr)
+
+def p_to_z(p_arr):
+    """
+    scipy.special.ndtri returns the argument x for which the area under the Gaussian 
+    probability density function (integrated from minus infinity to x) is equal to y.
+    """
+    return scipy.special.ndtri(1-p_arr)
+
+def fisher_meta_analysis(img_paths):
+    N_img = len(img_paths)
+    
+    p_values = np.zeros((N_img, Ni, Nj, Nk))
+
+    for n in range(N_img):
+        img = nilearn.image.load_img(img_paths[n])
+        img_resampled = image.resample_to_img(img, template)
+        arr = img_resampled.get_fdata()
+        #np.nan_to_num(arr, copy=False, nan=0)
+
+        p_values[n, :, :, :] = z_to_p(arr)
+
+    T_f = np.nan_to_num(-2*np.sum(np.log(p_values), axis=0))
+
+    # chi2 survival funtion: 
+    p_f = scipy.stats.chi2.sf(T_f, 2 * N_img)
+
+    fisher_arr = p_to_z(p_f)
+    maxnan = fisher_arr[fisher_arr != np.inf].max()
+    minnan = fisher_arr[fisher_arr != -np.inf].min()
+    np.nan_to_num(fisher_arr, copy=False, posinf=maxnan, neginf=minnan) # Truncate inf values
+    fisher_img = nib.Nifti1Image(np.array(fisher_arr), affine)
+
+    return fisher_img
+
+
+
+def nan_to(img_nii, number_for_nan):
+    arr = img_nii.get_fdata()
+    np.nan_no_num(arr, copy=False, posinf=0)
+    
+
+def run_Fishers(ds_dict):
+    """Run Fishers on given data."""
+    ds = Dataset(ds_dict)
+    ma = nimare.meta.ibma.Fishers()
+    res = ma.fit(ds)
+
+    return res.get_map('z')
+
+def df_strip(df):
+    df = df.copy()
+    for c in df.columns:
+        if df[c].dtype == np.object:
+            df[c] = pd.core.strings.str_strip(df[c])
+        df = df.rename(columns={c:c.strip()})
+    return df
+
+def get_data_paths_from_orig(filename):
+    path_orig = '../data-narps/orig/'
+    
+    team_list_file = '../data-narps/orig/team_folder_list.csv'
+    with open(team_list_file) as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',')
+        for row in csvreader: 
+            team_list = row
+
+    data_list = []
+    for team in team_list:
+        data_list.append(path_orig + team + '/' + filename)
+    
+    return data_list
+    
+    
 
 def get_activations(path, threshold, space='ijk'):
     """
@@ -46,7 +227,7 @@ def get_activations(path, threshold, space='ijk'):
 
     if np.isnan(img.get_fdata()).any():
         print(f'Img {path} contains Nan. Ignored.')
-        return None
+        return [], [], []
 
     img = nilearn.image.resample_to_img(img, template)
 
@@ -69,13 +250,18 @@ def get_activations(path, threshold, space='ijk'):
         
     return I, J, K
 
-def get_data_paths(input_dir):
+def get_data_paths(input_dir, image_type='zscore'):
+    image_types = {'zscore':'.nii.gz',
+                   'contrast':'_con.nii.gz',
+                   'standard_error':'_se.nii.gz',
+                    }
+    file_ending = image_types[image_type]
+    
     img_paths = []
     i = 0
 
     while True:
-        path = os.path.abspath(f'{input_dir}hypo1_unthresh_{i}.nii.gz')
-
+        path = os.path.abspath(f'{input_dir}hypo1_unthresh_{i}{file_ending}')
         if not os.path.isfile(path):
             break
 
