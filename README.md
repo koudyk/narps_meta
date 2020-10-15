@@ -2,6 +2,13 @@
 
 This repository holds the code that I used for a research project for a course, Neuroimaging Data Science. Essentially, we looked at analytic variability - how methods influence results - in brain imaging. 
 
+## Contents
+- [Abstract](#Abstract)
+- [Installation](#Installation)
+- [Acknowledgements](#Acknowledgements)
+
+<a name="Abstract"></a>
+
 ## Abstract
 ### Background 
 Analysis choices may influence results in research using functional magnetic resonance imaging (fMRI). Studies have shown this using simulations on real data [1]. But until recently, it was unclear how much analytic variability there is in the field, between actual research groups.
@@ -39,18 +46,22 @@ Our evaluation of the meta-analytic result as a potential solution to analytic v
 - [3] Dockès, J., Poldrack, R. A., Primet, R., Gözükan, H., Yarkoni, T., Suchanek, F., ... & Varoquaux, G. (2020). NeuroQuery, comprehensive meta-analysis of human brain mapping. Elife, 9, e53385.
 - [4] Alexander-Bloch, A. F., Shou, H., Liu, S., Satterthwaite, T. D., Glahn, D. C., Shinohara, R. T., ... & Raznahan, A. (2018). On testing for spatial correspondence between maps of human brain structure and function. Neuroimage, 178, 540-551.
 
+<a name="Installation"></a>
+
 ## Installation
+Follow these steps to re-run these analyses 
+(*BROKEN - This code isn't fully reproducible yet. The data was released after I finished the course project. I haven't fully automated downloading and using the openly-available data :(*)
+1. Get this repository: `$ git clone https://github.com/koudyk/narps_meta.git`
+2. Download the dataset: `$ cd narps_meta/data`, then `python 0_make_dataset.py`
+3. Build the docker image: `$ docker build -t narps_meta_analysis .`
+4. Start the docker container: `$ ./start_docker.sh`
+5. Copy and paste the link from your terminal into a web browser to access the notebook.
+6. In the Jupyter notebook environment, click on "test", and then click on the "analyses" folder.  
+7. Open the notebook (.ipynb file) that you want to run and click "Cell >> Run Cells" from the menu at the top of the page.
 
-To re-run these analyses, (*note that this won't work until the data is released publically.*)
-1. Download the dataset and move it to this directory: `./data_narps/`
-2. Get this repository: `$ git clone https://github.com/koudyk/narps_meta.git`
-3. Go to the repo: `$ cd narps_meta`
-4. Build the docker image: `$ docker build -t narps_meta_analysis .`
-5. Start the docker container: `$ ./start_docker.sh`
-6. Copy and paste the link from your terminal into a web browser to access the notebook.
-7. In the Jupyter notebook environment, click on the "analyses" folder.  
-8. Open a notebook (.ipynb file) and click "Cell >> Run Cells" from the menu at the top of the page.
+<a name="Acknowledgements"></a>
 
+## Acknowledgements
 Note that some of this code was borrowed/adapted from:
 - [Alexandre Perez](https://github.com/alexprz/meta_analysis_notebook),
 - [Ross Markello](https://netneurotools.readthedocs.io/en/latest/auto_examples/plot_mirchi_2018.html), and
